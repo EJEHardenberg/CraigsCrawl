@@ -104,17 +104,25 @@ Reads a files contents and generates documentation for that file
 		tmp.close()
 		#Grab the file block
 		fBlock = getFileBlock(blocks)
-		#Write out the basic information into the template
-		docString.sub!(/TITLE_DOCUMENTATION/,fBlock['name'])
-		docString.sub!(/FILENAME/,fBlock['name'])
-		docString.sub!(/FILEDESC/,fBlock['desc'])
+		#Write out the basic information into the template if they've included it
+		if fBlock
+			docString.sub!(/TITLE_DOCUMENTATION/,fBlock['name'])
+			docString.sub!(/FILENAME/,fBlock['name'])
+			docString.sub!(/FILEDESC/,fBlock['desc'])
+		end
 		docString.sub!(/FILELIST/,createFileList())
 		#format each block then write it to the file
 		blockString = ''
 		blocks.each{ |block| blockString << formatBlock(block)}
 		docString.sub!(/BLOCKS/,blockString)
 
-		puts docString
+		#write out the function names
+		funcNames = getFunctionNames(blocks)
+		funcList = "<ul>"
+		funcNames.each{|funcName| funcList << "<li><a href='#" + funcName['name'] + "' >" + funcName['name'] + "</a></li>"}
+		funcList << "</ul>"
+		docString.sub!(/FUNCTIONLIST/,funcList)
+
 
 		#Write our the document
 		docFile = File.new('doc/' + fileName + '.doc.html','w')
@@ -122,6 +130,15 @@ Reads a files contents and generates documentation for that file
 		docFile.close()
 
 
+	end
+
+	def self.getFunctionNames(blocks)
+		names = Array.new
+		blocks.each do |block| 
+			if(!block['file'])
+				names << block['name']
+			end
+		end	
 	end
 
 	def self.getFileBlock(blocks)
@@ -135,22 +152,24 @@ Retrieves the file block from an array of blocks. Returns nil if no file block f
 				return block
 			end
 		end
+		nil
 	end
 
 	def self.formatBlock(block)
 =begin 
 formatBlock
 Creates a div for the block and adds the information into it
+:blocks An array of block hashes
 =end
 		docBlock = ''
 		if(!block['file'])
-			docBlock << "<div class='block'><h3>" + block['name'] + "</h3><p>" + block['desc'] + '</p>'
+			docBlock << "<div id='"+block['name']+"' class='block'><h3>" + block['name'] + "</h3><p>" + block['desc'] + '</p>'
 			if block['params'].any?
 				docBlock << "<h4>Parameters</h4><dl>"
 				block['params'].each do |param|
 					docBlock << "<dt>" + param['name'] + "</dt><dd>" + param['desc'] + "</dd>"
 				end
-				docBlock << "</dl>"
+				docBlock << "</dl></div>"
 			end
 		end
 		docBlock
@@ -183,6 +202,5 @@ end
 
 if __FILE__==$0
 	#puts (Utility.readDataSet()).inspect
-	puts Utility.createFileList()
-	puts Utility.documentFile('utility.rb')
+	Utility.documentFiles()
 end
