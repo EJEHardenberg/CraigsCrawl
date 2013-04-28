@@ -97,15 +97,65 @@ Reads a files contents and generates documentation for that file
 		puts "Documenting " + fileName
 		docString = ""
 		blocks = findBlocks(fd.read)
+		fd.close()
 		#Open up the template
 		tmp = File.new(@@template)
 		docString = tmp.read
 		tmp.close()
-		#Write out the information into the template
+		#Grab the file block
+		fBlock = getFileBlock(blocks)
+		#Write out the basic information into the template
+		docString.sub!(/TITLE_DOCUMENTATION/,fBlock['name'])
+		docString.sub!(/FILENAME/,fBlock['name'])
+		docString.sub!(/FILEDESC/,fBlock['desc'])
+		docString.sub!(/FILELIST/,createFileList())
+		#format each block then write it to the file
+		blockString = ''
+		blocks.each{ |block| blockString << formatBlock(block)}
+		docString.sub!(/BLOCKS/,blockString)
 
-		fd.close()
+		puts docString
+
+		#Write our the document
+		docFile = File.new('doc/' + fileName + '.doc.html','w')
+		docFile.puts docString
+		docFile.close()
+
 
 	end
+
+	def self.getFileBlock(blocks)
+=begin
+getFileBlock
+Retrieves the file block from an array of blocks. Returns nil if no file block found
+:blocks An array of block hashes
+=end
+		blocks.each do |block| 
+			if(block['file'])
+				return block
+			end
+		end
+	end
+
+	def self.formatBlock(block)
+=begin 
+formatBlock
+Creates a div for the block and adds the information into it
+=end
+		docBlock = ''
+		if(!block['file'])
+			docBlock << "<div class='block'><h3>" + block['name'] + "</h3><p>" + block['desc'] + '</p>'
+			if block['params'].any?
+				docBlock << "<h4>Parameters</h4><dl>"
+				block['params'].each do |param|
+					docBlock << "<dt>" + param['name'] + "</dt><dd>" + param['desc'] + "</dd>"
+				end
+				docBlock << "</dl>"
+			end
+		end
+		docBlock
+	end
+
 
 	def self.createFileList()
 		ls = Dir.entries(Dir.pwd)

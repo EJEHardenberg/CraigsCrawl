@@ -4,3 +4,5 @@ lib/
 sym
 #Ignore the script I use to resolve the pathing issues form the command line to run the test
 test.sh
+#ignore generated documentation for now
+doc/*.doc.html
