@@ -1,20 +1,28 @@
 #!/usr/bin/env ruby
 
-		class Parser
+=begin 
+:file
+The Parser class provides a simple interface to grab the relevant data from a craigs list posting. 
+It uses some simple reg ex to parse the structure html of the page. Luckily this isn't the case of 
+html being impossible to parse with regular expressions.
+=end
+
+class Parser
+
 	def stripHead(document)
 =begin
 Strips the Head of an html document out and returns the stripped document
 :document The document to be stripped
 =end
-document.sub(/<head(.*)head>/im,'')
+	document.sub(/<head(.*)head>/im,'')
 	end
 	def stripHead!(document)
 =begin
 Strips the Head of an html document out and returns the stripped document
 :document The document to be stripped
 =end
-document.sub!(/<head(.*)head>/im,'')
-document
+	document.sub!(/<head(.*)head>/im,'')
+	document
 	end
 
 	def stripJavascript(document)
@@ -22,15 +30,15 @@ document
 Strips any thing between script tags out of the document
 :document The document to be stripped
 =end
-document.sub(/<script[^>]*>(.*?)script>/im,'')
+	document.sub(/<script[^>]*>(.*?)script>/im,'')
 	end
 	def stripJavascript!(document)
 =begin
 Strips any thing between script tags out of the document
 :document The document to be stripped
 =end
-document.sub!(/<script[^>]*>(.*?)script>/im,'')
-document
+	document.sub!(/<script[^>]*>(.*?)script>/im,'')
+	document
 	end
 
 	def stripHeaders(document)
@@ -38,15 +46,15 @@ document
 Strips H1,H2,H3s... out of the document
 :document The document to be stripped
 =end
-document.sub(/<h[0-9]*[^>]*>(.*?)<\/h[0-9]*>/im,'')
+	document.sub(/<h[0-9]*[^>]*>(.*?)<\/h[0-9]*>/im,'')
 	end
 	def stripHeaders!(document)
 =begin
 Strips H1,H2,H3s... out of the document
 :document The document to be stripped
 =end
-document.sub!(/<h[0-9]*[^>]*>(.*?)<\/h[0-9]*>/im,'')
-document
+	document.sub!(/<h[0-9]*[^>]*>(.*?)<\/h[0-9]*>/im,'')
+	document
 	end
 
 	def findPostings(document)
@@ -55,22 +63,24 @@ Find the list of p tags that represent postings in craigslist
 :document The document to be stripped
 =end
 #Whittle the string size down so our regex doesn't take too long
-stripHead!(document)
-stripJavascript!(document)
-stripHeaders!(document)
+	stripHead!(document)
+	stripJavascript!(document)
+	stripHeaders!(document)
 
-#Use the nicely structure format of craigslist to grab the postings
-postings = Array.new
-res = document.scan(/<p class="row" [^>]*>(.*?)<\/p>/im)
-res.each{|i| postings << i}
-postings.flatten!
+	#Use the nicely structure format of craigslist to grab the postings
+	postings = Array.new
+	res = document.scan(/<p class="row" [^>]*>(.*?)<\/p>/im)
+	res.each{|i| postings << i}
+	postings.flatten!
 
-#Grab the title text (this will be the training data)
-postings.each do |post|
-	#The second match is always the title
-	puts post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1]
-	puts post.scan(/<small> \((.*?)\)<\/small>/im).flatten
-end
+	#Grab the title text (this will be the training data)
+	posts = Array.new
+	postings.each do |post|
+		#The second match is always the title
+		posts << {'text'=> post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1], 'location' => post.scan(/<small> \((.*?)\)<\/small>/im).flatten}
+	end
+
+	posts
 	end
 
 end
@@ -560,4 +570,5 @@ var addToShortlistText = "add to shortlist";
 '
 p = Parser.new
 res = p.findPostings(document)
+puts res
 	end
