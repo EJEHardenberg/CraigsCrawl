@@ -64,8 +64,10 @@ return pages
 
 	def self.test()
 c = Crawler.new(pages=10)
+puts c.genPages()
+
 c.craigsCrawl()
-c.genPages()
+
 	end
 	 
 		end
