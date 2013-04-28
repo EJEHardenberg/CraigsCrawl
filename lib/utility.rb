@@ -6,6 +6,12 @@ utility.rb
 The Utility class contains miscellaneous functions such as writing and reading the dataset, as well as generating documentation
 =end
 
+#uri required to escape addresses when submitting google requests
+require 'rubygems'
+require 'uri'
+require 'net/http'
+require 'json'
+
 class Utility
 	@@template = '../doc/main_template.html'
 	@@docPath = '../doc/'
@@ -211,10 +217,52 @@ Parses the data for distinct locations and returns a list of these
 		end
 		dist
 	end
+
+	def self.mapsRequest(address)
+=begin
+mapsRequest
+Runs a google map request in order to help clean data, returns a town name or nil
+:address The address to send in the request
+=end
+		baseUrl = 'maps.googleapis.com'
+		page = '/maps/api/geocode/json?address=' + URI.escape(address) + '&sensor=false'
+		result =  JSON.parse(Net::HTTP.get(baseUrl, page))
+		if(result['status']=='OK')
+			#puts result['results'].inspect
+			result['results'].each do |res|
+				puts res['address_components']
+				res['address_components'].each do |comp|
+					puts comp.inspect
+					puts comp.class
+					comp['types'].each do |type|
+						puts type.inspect
+						puts type.class
+						if type=='locality'
+							return comp['long_name']
+						end
+					end
+				end
+			end
+		end
+	end
+
+	def self.cleanClasses(classes,data)
+=begin
+cleanClasses
+Reduces and condenses the number of classes, also reassigns the corresponding classes within the data
+=end
+		#Get the mapping of old class to new
+		classTransform = Hash.new
+		
+	end
+
 end
+
 
 if __FILE__==$0
 	#puts (Utility.readDataSet()).inspect
 	Utility.documentFiles()
 	puts "Done documenting"
+	#puts Utility.mapsRequest(" 10 MOUNTAIN VIEW BLVD") #works! returns south burlington!
+
 end
