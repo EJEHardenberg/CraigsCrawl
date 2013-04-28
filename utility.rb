@@ -42,8 +42,33 @@ Reads data from the specified fileName and returns an array of Hashmap
 		fd.close()
 		data
 	end
+
+	def self.documentFile(fileName)
+=begin 
+documentFile
+Reads a files contents and generates documentation for that file
+:fileName The name of the file to generate the documentation for
+=end
+		fd = File.new(fileName)
+		#DO WORK
+		puts "Documenting " + fileName
+		fd.close()
+
+	end
+
+	def self.createFileList()
+		ls = Dir.entries(Dir.pwd)
+		#IF they're a ruby file, lets doc em
+		ls.each do |file| 
+			if file.match(/\.rb$/im)
+				documentFile(file)
+			end
+		end
+
+	end
 end
 
 if __FILE__==$0
 	puts (Utility.readDataSet()).inspect
+	Utility.createFileList()
 end

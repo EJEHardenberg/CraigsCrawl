@@ -1,0 +1,19 @@
+#body{
+	padding-top: 5%;
+	padding-right: 0px;
+	margin-right: 0px;
+	background-color: #aaaaaa;
+	height: 100%;
+	width: 80%;
+	margin: auto;
+}
+#fileList{
+	float: left;
+	background-color: #eeeeee;
+	width: 20%;
+	height: 100%;
+}
+h1{
+	float: right;
+	clear: both;
+}
