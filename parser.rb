@@ -86,10 +86,10 @@ Find the list of p tags that represent postings in craigslist
 	postings.each do |post|
 		#The second match is always the title
 		h = Hash.new("Posting")
-		h["title"] = post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1].gsub(',','') 
+		h["title"] = post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1].gsub(',','').strip
 		h['location'] = post.scan(/<small> \((.*?)\)<\/small>/im).flatten[0]
 		if h['location'] != nil 
-			h['location'].gsub!(',','') 
+			h['location'].gsub!(',','')
 			posts <<  h
 		end
 	end
