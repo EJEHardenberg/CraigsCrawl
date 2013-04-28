@@ -20,7 +20,16 @@ class Crawler
 	attr_accessor :currentResult
 	attr_accessor :fileToWrite
 
-	def initialize(pages=9,host='burlington.craigslist.org',base='/apa/index',start='/apa/index.html',fileName="dump.txt")
+	def initialize(pages=9,host='burlington.craigslist.org',base='/apa/index',start='/apa/index.html',fileName="dump.data")
+=begin
+initialize
+Creates a crawler object with the specified parameters.
+:pages The number of pages to attempt to crawl using the base
+:host The base url which the base and start pages will use
+:base The base of pages we are crawling
+:start The starting page to crawl
+:fileName The name of the file to save the results of the crawl to
+=end
 		@pagesToCrawl = pages
 		@host = host
 		@basePage =  base
@@ -74,11 +83,10 @@ Generates an array of page names created from the basePage. The pages will be in
 	end
 	 
 end
-	
 
 
 if __FILE__ == $0
-	c = Crawler.new(pages=1)
+	c = Crawler.new(pages=10)
 	puts c.genPages()
 	c.craigsCrawl()
 end

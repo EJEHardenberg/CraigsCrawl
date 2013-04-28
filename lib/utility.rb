@@ -7,8 +7,9 @@ The Utility class contains miscellaneous functions such as writing and reading t
 =end
 
 class Utility
-	@@template = 'doc/main_template.html'
-	def self.writeDataSet(dataset=nil,fileName='dump.txt')
+	@@template = '../doc/main_template.html'
+	@@docPath = '../doc/'
+	def self.writeDataSet(dataset=nil,fileName='dump.data')
 =begin
 writeDataSet
 Writes data collected from crawls to the fileToWrite
@@ -18,14 +19,13 @@ Writes data collected from crawls to the fileToWrite
 		if(dataset != nil)
 			fd = File.new(fileName,'a')
 			dataset.each do |post|
-				puts post.inspect
-				fd.puts( post['title']+ ', ' + post['location'] )
+				fd.puts( post['title']+ ', ' + post['location'].strip.upcase )
 			end
 			fd.close()
 		end
 	end
 
-	def self.readDataSet(fileName='dump.txt')
+	def self.readDataSet(fileName='dump.data')
 =begin
 readDataSet
 Reads data from the specified fileName and returns an array of Hashmap
@@ -37,7 +37,7 @@ Reads data from the specified fileName and returns an array of Hashmap
 			h = Hash.new("Post")
 			info = line.split(',')
 			h['title'] = info[0]
-			h['location'] = info[1]
+			h['location'] = info[1].strip.upcase.to_sym
 			data << h
 		end
 		fd.close()
@@ -125,7 +125,7 @@ Reads a files contents and generates documentation for that file
 
 
 		#Write our the document
-		docFile = File.new('doc/' + fileName + '.doc.html','w')
+		docFile = File.new(@@docPath + fileName + '.doc.html','w')
 		docFile.puts docString
 		docFile.close()
 
@@ -198,9 +198,23 @@ Creates a div for the block and adds the information into it
 			end
 		end
 	end
+
+	def self.getDistinctClasses(dataList)
+=begin
+getDistinctClasses
+Parses the data for distinct locations and returns a list of these
+:dataList The data to be parsed, hash objects of {title=>'',location=>''} expected
+=end
+		dist = Hash.new
+		dataList.each do |data|
+			dist[data['location']] = dist.has_key?(data['location']) ? dist[data['location']] + 1 : 1
+		end
+		dist
+	end
 end
 
 if __FILE__==$0
 	#puts (Utility.readDataSet()).inspect
 	Utility.documentFiles()
+	puts "Done documenting"
 end
