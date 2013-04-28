@@ -1,0 +1,6 @@
+#Ignore the stuff classifier
+lib/
+#Ignore my symlink for easy editing
+sym
+#Ignore the script I use to resolve the pathing issues form the command line to run the test
+test.sh
