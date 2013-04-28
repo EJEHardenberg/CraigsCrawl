@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 =begin 
+parser.rb
 :file
 The Parser class provides a simple interface to grab the relevant data from a craigs list posting. 
 It uses some simple reg ex to parse the structure html of the page. Luckily this isn't the case of 
@@ -11,6 +12,7 @@ class Parser
 
 	def stripHead(document)
 =begin
+stripHead
 Strips the Head of an html document out and returns the stripped document
 :document The document to be stripped
 =end
@@ -18,7 +20,8 @@ Strips the Head of an html document out and returns the stripped document
 	end
 	def stripHead!(document)
 =begin
-Strips the Head of an html document out and returns the stripped document
+stripHead!
+Strips the Head of an html document out and returns the stripped document, modifies original document
 :document The document to be stripped
 =end
 	document.sub!(/<head(.*)head>/im,'')
@@ -27,6 +30,7 @@ Strips the Head of an html document out and returns the stripped document
 
 	def stripJavascript(document)
 =begin
+stripJavascript
 Strips any thing between script tags out of the document
 :document The document to be stripped
 =end
@@ -34,7 +38,8 @@ Strips any thing between script tags out of the document
 	end
 	def stripJavascript!(document)
 =begin
-Strips any thing between script tags out of the document
+stripJavascript! 
+Strips any thing between script tags out of the document, modifys document
 :document The document to be stripped
 =end
 	document.sub!(/<script[^>]*>(.*?)script>/im,'')
@@ -43,6 +48,7 @@ Strips any thing between script tags out of the document
 
 	def stripHeaders(document)
 =begin
+stripHeaders
 Strips H1,H2,H3s... out of the document
 :document The document to be stripped
 =end
@@ -50,7 +56,8 @@ Strips H1,H2,H3s... out of the document
 	end
 	def stripHeaders!(document)
 =begin
-Strips H1,H2,H3s... out of the document
+stripHeaders!
+Strips H1,H2,H3s... out of the document, modifies parameter
 :document The document to be stripped
 =end
 	document.sub!(/<h[0-9]*[^>]*>(.*?)<\/h[0-9]*>/im,'')
@@ -59,6 +66,7 @@ Strips H1,H2,H3s... out of the document
 
 	def findPostings(document)
 =begin
+findPostings
 Find the list of p tags that represent postings in craigslist
 :document The document to be stripped
 =end
@@ -77,7 +85,10 @@ Find the list of p tags that represent postings in craigslist
 	posts = Array.new
 	postings.each do |post|
 		#The second match is always the title
-		posts << {'text'=> post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1], 'location' => post.scan(/<small> \((.*?)\)<\/small>/im).flatten}
+		h = Hash.new("Posting")
+		h["title"] = post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1]
+		h['location'] = post.scan(/<small> \((.*?)\)<\/small>/im).flatten 
+		posts <<  h
 	end
 
 	posts
