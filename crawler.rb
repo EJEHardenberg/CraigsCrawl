@@ -17,13 +17,15 @@ class Crawler
 	attr_accessor :basePage
 	attr_accessor :startPage
 	attr_accessor :currentResult
+	attr_accessor :fileToWrite
 
-	def initialize(pages=9,host='burlington.craigslist.org',base='/apa/index',start='/apa/index.html')
+	def initialize(pages=9,host='burlington.craigslist.org',base='/apa/index',start='/apa/index.html',fileName="dump.txt")
 		@pagesToCrawl = pages
 		@host = host
 		@basePage =  base
 		@startPage = start
 		@currentResult = nil
+		@fileToWrite = fileName
 	end
 
 	def crawl(page)
@@ -55,8 +57,7 @@ This function crawls the base page first, then iterates through however many pag
 			posts.each{|post| allPostings << post}
 		end
 
-		puts allPostings
-
+		writeDataSet(allPostings.flatten)
 	end
 
 	def genPages()
@@ -71,18 +72,29 @@ Generates an array of page names created from the basePage. The pages will be in
 		return pages
 	end
 
-	def self.test()
-		c = Crawler.new(pages=1)
-		puts c.genPages()
-		c.craigsCrawl()
-	end
+	def writeDataSet(dataset=nil)
+=begin 
+writeDataSet
+Writes data collected from crawls to the fileToWrite
+:dataset The dataset to be written out
+=end
+		if( dataset != nil)
+			fd = File.new (@fileToWrite,'a')
+			dataset.each do |post|
+				puts post.inspect
+				fd.puts( post['title']+ ', ' + post['location'] )
+			end
+			fd.close()
+		end
 
-	def dump
+	end
 	 
 end
 	
 
 
 if __FILE__ == $0
-	Crawler.test()
+	c = Crawler.new(pages=1)
+	puts c.genPages()
+	c.craigsCrawl()
 end
