@@ -1,0 +1,41 @@
+#body{
+	padding-top: 5%;
+	padding-right: 0px;
+	margin-right: 0px;
+	background-color: #aaaaaa;
+	height: 100%;
+	width: 80%;
+	margin: auto;
+}
+#fileList{
+	float: left;
+	height: 100%;
+}
+#functionList{
+	clear: left;
+	float: left;
+}
+h1{
+	text-align: center;
+	margin: auto;
+	width: 100%;
+	clear: both;
+}
+.block{
+	border: dashed medium #000000;
+	padding: 1%;
+	background-color: #afafaf;
+}
+.left{
+	width: 20%;
+	float: left;
+	background-color: #eeeeee;
+	padding: 0px;
+	margin:0px;
+}
+.right{
+	width: 80%;
+	float: right;
+	padding: 0px;
+	margin:0px;
+}

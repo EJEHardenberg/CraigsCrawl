@@ -2,6 +2,8 @@
 
 require 'net/http'
 require 'parser'
+require 'utility'
+
 =begin
 crawler.rb
 :file
@@ -10,7 +12,6 @@ We can specify how many pages we want simply by manipulating the url /apa/index/
 http://burlington.craigslist.org/apa/index200.html
 =end
 
-		#GOD HELP ME I'M USING REVERSE INDENTATION
 class Crawler
 	attr_accessor :pagesToCrawl
 	attr_accessor :host
@@ -57,7 +58,7 @@ This function crawls the base page first, then iterates through however many pag
 			posts.each{|post| allPostings << post}
 		end
 
-		writeDataSet(allPostings.flatten)
+		Utility.writeDataSet(allPostings.flatten,@fileToWrite)
 	end
 
 	def genPages()
@@ -70,23 +71,6 @@ Generates an array of page names created from the basePage. The pages will be in
 		(1..(pagesToCrawl-1)).each{|i| pages << @basePage + i.to_s() + '00' + '.html'  }
 		#Ruby probably wants me to just say pages and let it's magic handle it but I really do prefer an explicit return
 		return pages
-	end
-
-	def writeDataSet(dataset=nil)
-=begin 
-writeDataSet
-Writes data collected from crawls to the fileToWrite
-:dataset The dataset to be written out
-=end
-		if( dataset != nil)
-			fd = File.new (@fileToWrite,'a')
-			dataset.each do |post|
-				puts post.inspect
-				fd.puts( post['title']+ ', ' + post['location'] )
-			end
-			fd.close()
-		end
-
 	end
 	 
 end
