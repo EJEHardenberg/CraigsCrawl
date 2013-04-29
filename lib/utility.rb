@@ -25,9 +25,10 @@ Writes data collected from crawls to the fileToWrite
 		if(dataset != nil)
 			fd = File.new(fileName,'a')
 			dataset.each do |post|
-				if(post['location'].to_i > 1000)
+				if(post['location'].to_i < 4000)
 					#Some person put int 450500 as the price for 450-500 and it screws us up
-					fd.puts( post['title']+ ', ' + post['location'].strip.upcase )
+					#Also remove newlines in the title so we'll be able to read it back in
+					fd.puts( post['title'].strip.upcase.sub(',','').gsub('$',' ').sub('<BR>','').gsub(/(\n|\r)/im,' ')+ ', ' + post['location'].strip.upcase )
 				end
 			end
 			fd.close()
@@ -46,7 +47,7 @@ Reads data from the specified fileName and returns an array of Hashmap
 			h = Hash.new("Post")
 			info = line.split(',')
 			h['title'] = info[0]
-			h['location'] = info[1].strip.upcase
+			h['location'] = info[1]
 			data << h
 		end
 		fd.close()

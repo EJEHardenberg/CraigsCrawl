@@ -19,6 +19,7 @@ class Crawler
 	attr_accessor :startPage
 	attr_accessor :currentResult
 	attr_accessor :fileToWrite
+	attr_accessor :gatheredData
 
 	def initialize(pages=9,host='burlington.craigslist.org',base='/apa/index',start='/apa/index.html',fileName="dump.data")
 =begin
@@ -36,6 +37,7 @@ Creates a crawler object with the specified parameters.
 		@startPage = start
 		@currentResult = nil
 		@fileToWrite = fileName
+		@gatheredData = Array.new 
 	end
 
 	def crawl(page)
@@ -57,7 +59,7 @@ This function crawls the base page first, then iterates through however many pag
 		#generate list of pages to be crawled
 		pages = [@startPage,genPages()].flatten
 
-		#Crawl each page and pass it to the parser (parser on todo list)
+		#Crawl each page and pass it to the parser
 		allPostings = Array.new
 		parser = Parser.new
 		pages.each do |page|
@@ -76,6 +78,34 @@ deepCrawl
 This function crawls a basic page, retrieves the links from it, and then follows each link to retrieve more descriptive data
 :none No Parameters
 =end
+		#generate list of pages to be crawled
+		pages = [@startPage,genPages()].flatten
+
+		#Crawl each page and pass it to the parser
+		allPostings = Array.new
+		parser = Parser.new
+		
+		pages.each do |page|
+			crawl(page)
+			#Get the price,title, and link
+			posts = parser.findPostings(@currentResult)
+			#Crawl the link and retrieve it's info, appending to the title to make it easier
+			posts.each do |post|
+				crawl(post['link'])
+				body = parser.getPostBody(@currentResult)
+				if body != nil
+					#only include it if we can get the body
+					post['title'] = post['title'] + ' ' +  body
+					allPostings << post
+					@gatheredData << post
+				end
+			end
+		end
+
+		#Write out that data!
+		Utility.writeDataSet(allPostings.flatten,@fileToWrite)
+		
+	end
 
 	def genPages()
 =begin
@@ -93,7 +123,7 @@ end
 
 
 if __FILE__ == $0
-	c = Crawler.new(pages=10)
+	c = Crawler.new(pages=1)
 	puts c.genPages()
-	c.craigsCrawl()
+	c.deepCrawl()
 end

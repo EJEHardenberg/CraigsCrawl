@@ -22,10 +22,26 @@ class Miner
 		#Crawl the web
 		@cls = StuffClassifier::Bayes.new("Craigs", :stemming=>true)
 		#The two lines below can be commented out once the pages have been crawled
-		# spider = Crawler.new(0,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
-		# spider.craigsCrawl()
-		#spider = Crawler.new(20,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
-		#spider.craigsCrawl()
+		spider = Crawler.new(20,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
+		begin
+			spider.deepCrawl()	
+		rescue Exception => e
+			#whatever
+			puts "Interupted during crawl"
+			Utility.writeDataSet(spider.gatheredData,spider.fileToWrite)
+		end
+		#go to sleep little program
+		puts "sleeping"
+		sleep(2)
+		puts "waking up and spamming craigslist"
+		spider = Crawler.new(20,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
+		begin
+			spider.deepCrawl()	
+		rescue Exception => e
+			puts "Interupted during crawl"
+			Utility.writeDataSet(spider.gatheredData,spider.fileToWrite)
+		end
+		
 		@rawData = Utility.readDataSet(fileName)
 		puts @rawData.length
 		#Break it into price brackets
