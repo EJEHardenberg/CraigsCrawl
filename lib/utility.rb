@@ -25,7 +25,10 @@ Writes data collected from crawls to the fileToWrite
 		if(dataset != nil)
 			fd = File.new(fileName,'a')
 			dataset.each do |post|
-				fd.puts( post['title']+ ', ' + post['location'].strip.upcase )
+				if(post['location'].to_i > 1000)
+					#Some person put int 450500 as the price for 450-500 and it screws us up
+					fd.puts( post['title']+ ', ' + post['location'].strip.upcase )
+				end
 			end
 			fd.close()
 		end
@@ -273,33 +276,29 @@ Reduces and condenses the number of classes, also reassigns the corresponding cl
 =begin
 priceBracket
 Converts raw data to use classes corresponding to their price range
-=end
+=end	
+		tots = Hash.new 
+		tots[1] = 0
+		tots[2] = 0
+		avg = 0
+		count = 0
 		data.each do |d|
+			avg = avg + d['location'].to_i
+			count += 1
 			d['location'] = Utility.whichBracket(d['location'])
+			tots[d['location']] = tots[d['location']] + 1
 		end
+		puts "Average: " + (avg/count.to_f).to_s
+		puts "Distribution: 1:" + tots[1].to_s + " 2: " + tots[2].to_s
 		data
 	end
 
 	def self.whichBracket(price)
 		bracket = 0
-		if(price.to_i < 600)
+		if(price.to_i <= 1000)
 			bracket =1
-		elsif(price.to_i < 800)
-			bracket =2
-		elsif(price.to_i < 1000)
-			bracket =3
-		elsif(price.to_i < 1200)
-			bracket =4
-		elsif(price.to_i < 1400)
-			bracket =5
-		elsif(price.to_i < 1600)
-			bracket =6
-		elsif(price.to_i < 1800)
-			bracket =7
-		elsif(price.to_i < 2000)
-			bracket =8
 		else
-			bracket =9
+			bracket =2
 		end
 		bracket
 	end

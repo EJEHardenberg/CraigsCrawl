@@ -64,6 +64,14 @@ Strips H1,H2,H3s... out of the document, modifies parameter
 	document
 	end
 
+	def getPostBody(document)
+=begin
+getPostBody
+Finds the details of a post by looking for the posting body id
+:document The document to search in
+=end
+		document.match(/<section id="postingbody">(.*?)<\/section>/im)
+	end
 	def findPostings(document)
 =begin
 findPostings

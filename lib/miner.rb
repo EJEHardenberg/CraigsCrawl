@@ -15,16 +15,17 @@ class Miner
 	@cls
 	@rawData
 	@trainingData
+	@validationData
 	@classes
 
 	def initialize(fileName='dump.data')
 		#Crawl the web
-		@cls = StuffClassifier::Bayes.new("Craigs", :stemming=>false)
+		@cls = StuffClassifier::Bayes.new("Craigs", :stemming=>true)
 		#The two lines below can be commented out once the pages have been crawled
-		spider = Crawler.new(50,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
-		spider.craigsCrawl()
-		spider = Crawler.new(50,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
-		spider.craigsCrawl()
+		# spider = Crawler.new(0,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
+		# spider.craigsCrawl()
+		#spider = Crawler.new(20,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
+		#spider.craigsCrawl()
 		@rawData = Utility.readDataSet(fileName)
 		puts @rawData.length
 		#Break it into price brackets
@@ -38,11 +39,14 @@ class Miner
 
 	def generateTrainingData()
 		@trainingData = Array.new
+		@validationData = Array.new
 		included = 0
 		@rawData.each do |data|
 			#include every 3rd data piece in
-			if included % 3 == 1
+			if included % 5 == 1
 				@trainingData << data
+			else
+				@validationData << data
 			end
 			included += 1
 		end
@@ -57,7 +61,7 @@ class Miner
 	def validate()
 		correct=0
 		wrong = 0
-		@rawData.each do |data| 
+		@validationData.each do |data| 
 			targetClass = data['location']
 			guess = @cls.classify(data['title'])
 			if guess != nil

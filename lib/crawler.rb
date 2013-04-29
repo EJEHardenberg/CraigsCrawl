@@ -70,6 +70,13 @@ This function crawls the base page first, then iterates through however many pag
 		Utility.writeDataSet(allPostings.flatten,@fileToWrite)
 	end
 
+	def deepCrawl()
+=begin
+deepCrawl
+This function crawls a basic page, retrieves the links from it, and then follows each link to retrieve more descriptive data
+:none No Parameters
+=end
+
 	def genPages()
 =begin
 genPages
