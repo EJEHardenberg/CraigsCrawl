@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-=begin 
+=begin
 parser.rb
 :file
 The Parser class provides a simple interface to grab the relevant data from a craigs list posting. 
@@ -64,6 +64,14 @@ Strips H1,H2,H3s... out of the document, modifies parameter
 	document
 	end
 
+	def getPostBody(document)
+=begin
+getPostBody
+Finds the details of a post by looking for the posting body id
+:document The document to search in
+=end
+		document.match(/<section id="postingbody">(.*?)<\/section>/im)
+	end
 	def findPostings(document)
 =begin
 findPostings
@@ -87,7 +95,7 @@ Find the list of p tags that represent postings in craigslist
 		#The second match is always the title
 		h = Hash.new("Posting")
 		h["title"] = post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1].gsub(',','').strip
-		h['location'] = post.scan(/<small> \((.*?)\)<\/small>/im).flatten[0]
+		h['location'] = post.scan(/<span class="itemprice">\$(.*?)<\/span>/im).flatten[0]
 		if h['location'] != nil 
 			h['location'].gsub!(',','')
 			posts <<  h

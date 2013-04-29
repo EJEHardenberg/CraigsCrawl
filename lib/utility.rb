@@ -6,9 +6,16 @@ utility.rb
 The Utility class contains miscellaneous functions such as writing and reading the dataset, as well as generating documentation
 =end
 
+#uri required to escape addresses when submitting google requests
+require 'rubygems'
+require 'uri'
+require 'net/http'
+require 'json'
+
 class Utility
-	@@template = 'doc/main_template.html'
-	def self.writeDataSet(dataset=nil,fileName='dump.txt')
+	@@template = '../doc/main_template.html'
+	@@docPath = '../doc/'
+	def self.writeDataSet(dataset=nil,fileName='dump.data')
 =begin
 writeDataSet
 Writes data collected from crawls to the fileToWrite
@@ -18,14 +25,16 @@ Writes data collected from crawls to the fileToWrite
 		if(dataset != nil)
 			fd = File.new(fileName,'a')
 			dataset.each do |post|
-				puts post.inspect
-				fd.puts( post['title']+ ', ' + post['location'] )
+				if(post['location'].to_i > 1000)
+					#Some person put int 450500 as the price for 450-500 and it screws us up
+					fd.puts( post['title']+ ', ' + post['location'].strip.upcase )
+				end
 			end
 			fd.close()
 		end
 	end
 
-	def self.readDataSet(fileName='dump.txt')
+	def self.readDataSet(fileName='dump.data')
 =begin
 readDataSet
 Reads data from the specified fileName and returns an array of Hashmap
@@ -37,7 +46,7 @@ Reads data from the specified fileName and returns an array of Hashmap
 			h = Hash.new("Post")
 			info = line.split(',')
 			h['title'] = info[0]
-			h['location'] = info[1]
+			h['location'] = info[1].strip.upcase
 			data << h
 		end
 		fd.close()
@@ -125,7 +134,7 @@ Reads a files contents and generates documentation for that file
 
 
 		#Write our the document
-		docFile = File.new('doc/' + fileName + '.doc.html','w')
+		docFile = File.new(@@docPath + fileName + '.doc.html','w')
 		docFile.puts docString
 		docFile.close()
 
@@ -198,9 +207,108 @@ Creates a div for the block and adds the information into it
 			end
 		end
 	end
+
+	def self.getDistinctClasses(dataList)
+=begin
+getDistinctClasses
+Parses the data for distinct locations and returns a list of these
+:dataList The data to be parsed, hash objects of {title=>'',location=>''} expected
+=end
+		dist = Hash.new
+		dataList.each do |data|
+			dist[data['location']] = dist.has_key?(data['location']) ? dist[data['location']] + 1 : 1
+		end
+		dist
+	end
+
+	def self.mapsRequest(address)
+=begin
+mapsRequest
+Runs a google map request in order to help clean data, returns a town name or nil
+:address The address to send in the request
+=end
+		baseUrl = 'maps.googleapis.com'
+		page = '/maps/api/geocode/json?address=' + URI.escape(address.to_s.sub("&AMP","&")) + '&sensor=false'
+		result =  JSON.parse(Net::HTTP.get(baseUrl, page))
+		if(result['status']=='OK')
+			#puts result['results'].inspect
+			result['results'].each do |res|
+				res['address_components'].each do |comp|
+					comp['types'].each do |type|
+						if type=='administrative_area_level_2'
+							return comp['long_name']
+						end
+					end
+				end
+			end
+		end
+	end
+
+	def self.cleanClasses(classes,data)
+=begin
+cleanClasses
+Reduces and condenses the number of classes, also reassigns the corresponding classes within the data
+:classes The classes to be condensed
+:data The raw data as an array of hash maps
+=end
+		#Setup the mapping of old class to new
+		classTransform = Hash.new
+		classes.each do |dClass,n|
+			if(!classTransform.has_key?(dClass))
+				newClass = Utility.mapsRequest(dClass)
+				if newClass != nil
+					classTransform[dClass] = newClass
+				else
+					#Leave a class we failed to lookup as itself
+					classTransform[dClass] = dClass
+				end
+			end
+		end
+		#Now we have our mapping we must transform the data
+		data.each do |d|
+			d['location'] = classTransform[d['location']]
+		end
+		#Return the data
+		data
+	end
+
+	def self.priceBracket(data)
+=begin
+priceBracket
+Converts raw data to use classes corresponding to their price range
+=end	
+		tots = Hash.new 
+		tots[1] = 0
+		tots[2] = 0
+		avg = 0
+		count = 0
+		data.each do |d|
+			avg = avg + d['location'].to_i
+			count += 1
+			d['location'] = Utility.whichBracket(d['location'])
+			tots[d['location']] = tots[d['location']] + 1
+		end
+		puts "Average: " + (avg/count.to_f).to_s
+		puts "Distribution: 1:" + tots[1].to_s + " 2: " + tots[2].to_s
+		data
+	end
+
+	def self.whichBracket(price)
+		bracket = 0
+		if(price.to_i <= 1000)
+			bracket =1
+		else
+			bracket =2
+		end
+		bracket
+	end
 end
+
 
 if __FILE__==$0
 	#puts (Utility.readDataSet()).inspect
 	Utility.documentFiles()
+	puts "Done documenting"
+	#puts Utility.mapsRequest(" 10 MOUNTAIN VIEW BLVD") #works! returns south burlington!
+
 end
