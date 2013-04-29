@@ -9,7 +9,6 @@ html being impossible to parse with regular expressions.
 =end
 
 class Parser
-
 	def stripHead(document)
 =begin
 stripHead
@@ -70,8 +69,19 @@ getPostBody
 Finds the details of a post by looking for the posting body id
 :document The document to search in
 =end
-		document.match(/<section id="postingbody">(.*?)<\/section>/im)
+		document.scan(/<section id="postingbody">(.*?)<\/section>/im).flatten[0]
 	end
+
+	def getPostLinks(document,pattern=/<a href="(http:\/\/burlington\.craigslist\.org\/(roo|apa)\/[0-9]*\.html)">/im)
+=begin
+getPostLinks
+Finds the pattern within the document and returns all of them
+:document The document to match against
+:pattern a regular expression to use to search the document, for example /<a href="(http:\/\/burlington\.craigslist\.org\/apa\/[0-9]*\.html)">/im
+=end
+		document.scan(pattern).flatten
+	end
+
 	def findPostings(document)
 =begin
 findPostings
@@ -96,6 +106,7 @@ Find the list of p tags that represent postings in craigslist
 		h = Hash.new("Posting")
 		h["title"] = post.scan(/<a href[^>]*>(.*?)<\/a>/im).flatten[1].gsub(',','').strip
 		h['location'] = post.scan(/<span class="itemprice">\$(.*?)<\/span>/im).flatten[0]
+		h['link'] = post.scan(/<a href="(http:\/\/burlington\.craigslist\.org\/(roo|apa)\/[0-9]*\.html)">/im).flatten[0]
 		if h['location'] != nil 
 			h['location'].gsub!(',','')
 			posts <<  h
@@ -592,5 +603,8 @@ var addToShortlistText = "add to shortlist";
 '
 p = Parser.new
 res = p.findPostings(document)
-puts res
+
+res2 =p.getPostLinks(document)
+res.each{|r| puts r['link']}
+
 	end
