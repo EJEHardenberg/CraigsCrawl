@@ -19,13 +19,27 @@ class Miner
 
 	def initialize(fileName='dump.data')
 		#Crawl the web
-		#@cls = StuffClassifier::TfId.new("Craigs")
 		@cls = StuffClassifier::Bayes.new("Craigs")
+		#@cls = StuffClassifier::Bayes.new("Craigs")
 		#The two lines below can be commented out once the pages have been crawled
 		#spider = Crawler.new(15,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
 		#spider.craigsCrawl()
-		@rawData = Utility.readDataSet(fileName)
+		readingFile = true
+		if readingFile
+			f = File.new('scrubbed.data')
+			@rawData = eval(f.read)
+			f.close()
+		else
+			@rawData = Utility.readDataSet(fileName)
+			unScrubbedClasses = Utility.getDistinctClasses(@rawData)
+			@rawData = Utility.cleanClasses(unScrubbedClasses,@rawData)
+			#output the scrubbed data so we don't have to get it again from the web
+			f=File.new('scrubbed.data','w')
+			f.puts(@rawData.inspect)
+			f.close()
+		end
 		@classes = Utility.getDistinctClasses(@rawData)
+		
 		puts  @classes.length
 		#@classes.each{|c,n| puts c.to_s + 'examples: ' + n.to_s}
 		@trainingData = Array.new
@@ -57,9 +71,14 @@ class Miner
 		@rawData.each do |data| 
 			targetClass = data['location']
 			guess = @cls.classify(data['title'])
-			if guess == targetClass
+			if guess != nil
+				guess =guess.to_s.upcase
+			end
+			if guess == targetClass.to_s.upcase
+				puts "Target: " + targetClass.to_s.upcase + " Guess: " + guess.to_s.upcase
 				correct += 1
 			else
+				puts "Target: " + targetClass.to_s.upcase  + " Guess: " + (guess==nil ? 'no' : guess.to_s)
 				wrong +=1
 			end
 		end

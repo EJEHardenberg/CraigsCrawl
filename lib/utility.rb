@@ -225,19 +225,14 @@ Runs a google map request in order to help clean data, returns a town name or ni
 :address The address to send in the request
 =end
 		baseUrl = 'maps.googleapis.com'
-		page = '/maps/api/geocode/json?address=' + URI.escape(address) + '&sensor=false'
+		page = '/maps/api/geocode/json?address=' + URI.escape(address.to_s.sub("&AMP","&")) + '&sensor=false'
 		result =  JSON.parse(Net::HTTP.get(baseUrl, page))
 		if(result['status']=='OK')
 			#puts result['results'].inspect
 			result['results'].each do |res|
-				puts res['address_components']
 				res['address_components'].each do |comp|
-					puts comp.inspect
-					puts comp.class
 					comp['types'].each do |type|
-						puts type.inspect
-						puts type.class
-						if type=='locality'
+						if type=='administrative_area_level_2'
 							return comp['long_name']
 						end
 					end
@@ -251,9 +246,25 @@ Runs a google map request in order to help clean data, returns a town name or ni
 cleanClasses
 Reduces and condenses the number of classes, also reassigns the corresponding classes within the data
 =end
-		#Get the mapping of old class to new
+		#Setup the mapping of old class to new
 		classTransform = Hash.new
-		
+		classes.each do |dClass,n|
+			if(!classTransform.has_key?(dClass))
+				newClass = Utility.mapsRequest(dClass)
+				if newClass != nil
+					classTransform[dClass] = newClass
+				else
+					#Leave a class we failed to lookup as itself
+					classTransform[dClass] = dClass
+				end
+			end
+		end
+		#Now we have our mapping we must transform the data
+		data.each do |d|
+			d['location'] = classTransform[d['location']]
+		end
+		#Return the data
+		data
 	end
 
 end
