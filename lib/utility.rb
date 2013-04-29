@@ -43,7 +43,7 @@ Reads data from the specified fileName and returns an array of Hashmap
 			h = Hash.new("Post")
 			info = line.split(',')
 			h['title'] = info[0]
-			h['location'] = info[1].strip.upcase.to_sym
+			h['location'] = info[1].strip.upcase
 			data << h
 		end
 		fd.close()
@@ -245,6 +245,8 @@ Runs a google map request in order to help clean data, returns a town name or ni
 =begin
 cleanClasses
 Reduces and condenses the number of classes, also reassigns the corresponding classes within the data
+:classes The classes to be condensed
+:data The raw data as an array of hash maps
 =end
 		#Setup the mapping of old class to new
 		classTransform = Hash.new
@@ -267,6 +269,40 @@ Reduces and condenses the number of classes, also reassigns the corresponding cl
 		data
 	end
 
+	def self.priceBracket(data)
+=begin
+priceBracket
+Converts raw data to use classes corresponding to their price range
+=end
+		data.each do |d|
+			d['location'] = Utility.whichBracket(d['location'])
+		end
+		data
+	end
+
+	def self.whichBracket(price)
+		bracket = 0
+		if(price.to_i < 600)
+			bracket =1
+		elsif(price.to_i < 800)
+			bracket =2
+		elsif(price.to_i < 1000)
+			bracket =3
+		elsif(price.to_i < 1200)
+			bracket =4
+		elsif(price.to_i < 1400)
+			bracket =5
+		elsif(price.to_i < 1600)
+			bracket =6
+		elsif(price.to_i < 1800)
+			bracket =7
+		elsif(price.to_i < 2000)
+			bracket =8
+		else
+			bracket =9
+		end
+		bracket
+	end
 end
 
 

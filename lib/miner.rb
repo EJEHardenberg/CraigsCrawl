@@ -19,40 +19,29 @@ class Miner
 
 	def initialize(fileName='dump.data')
 		#Crawl the web
-		@cls = StuffClassifier::Bayes.new("Craigs")
-		#@cls = StuffClassifier::Bayes.new("Craigs")
+		@cls = StuffClassifier::Bayes.new("Craigs", :stemming=>false)
 		#The two lines below can be commented out once the pages have been crawled
-		#spider = Crawler.new(15,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
-		#spider.craigsCrawl()
-		readingFile = true
-		if readingFile
-			f = File.new('scrubbed.data')
-			@rawData = eval(f.read)
-			f.close()
-		else
-			@rawData = Utility.readDataSet(fileName)
-			unScrubbedClasses = Utility.getDistinctClasses(@rawData)
-			@rawData = Utility.cleanClasses(unScrubbedClasses,@rawData)
-			#output the scrubbed data so we don't have to get it again from the web
-			f=File.new('scrubbed.data','w')
-			f.puts(@rawData.inspect)
-			f.close()
-		end
-		@classes = Utility.getDistinctClasses(@rawData)
-		
-		puts  @classes.length
-		#@classes.each{|c,n| puts c.to_s + 'examples: ' + n.to_s}
-		@trainingData = Array.new
+		spider = Crawler.new(50,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
+		spider.craigsCrawl()
+		spider = Crawler.new(50,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
+		spider.craigsCrawl()
+		@rawData = Utility.readDataSet(fileName)
+		puts @rawData.length
+		#Break it into price brackets
+		@rawData = Utility.priceBracket(@rawData)
+
+		#Train the classifier
 		generateTrainingData()
 		train()
 		validate()
 	end
 
 	def generateTrainingData()
+		@trainingData = Array.new
 		included = 0
 		@rawData.each do |data|
 			#include every 3rd data piece in
-			if included % 3 == 0
+			if included % 3 == 1
 				@trainingData << data
 			end
 			included += 1
