@@ -21,7 +21,7 @@ class Miner
 	def initialize(fileName='dump.data')
 		#Crawl the web
 		@cls = StuffClassifier::Bayes.new("Craigs", :stemming=>true)
-		#The two lines below can be commented out once the pages have been crawled
+		#The  lines below can be commented out once the pages have been crawled
 		spider = Crawler.new(20,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
 		begin
 			spider.deepCrawl()	

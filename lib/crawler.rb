@@ -46,7 +46,12 @@ crawl
 Crawls a single page.
 :page The page to crawl 
 =end
-		@currentResult = Net::HTTP.get(@host, page)
+		begin
+			@currentResult = Net::HTTP.get(@host, page)	
+		rescue Exception => e
+			puts "Failed crawling " + page.to_s
+		end
+		
 	end
 
 	def craigsCrawl()
@@ -95,7 +100,7 @@ This function crawls a basic page, retrieves the links from it, and then follows
 				body = parser.getPostBody(@currentResult)
 				if body != nil
 					#only include it if we can get the body
-					post['title'] = post['title'] + ' ' +  body
+					post['title'] = post['title'].gsub(',','') + ' ' +  body.gsub(',','')
 					allPostings << post
 					@gatheredData << post
 				end

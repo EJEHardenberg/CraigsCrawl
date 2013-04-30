@@ -28,7 +28,7 @@ Writes data collected from crawls to the fileToWrite
 				if(post['location'].to_i < 4000)
 					#Some person put int 450500 as the price for 450-500 and it screws us up
 					#Also remove newlines in the title so we'll be able to read it back in
-					fd.puts( post['title'].strip.upcase.sub(',','').gsub('$',' ').sub('<BR>','').gsub(/(\n|\r)/im,' ')+ ', ' + post['location'].strip.upcase )
+					fd.puts( post['title'].strip.upcase.gsub(',','').gsub('$',' ').gsub('<BR>','').gsub(/(\n|\r)/im,' ')+ ', ' + post['location'].strip.upcase )
 				end
 			end
 			fd.close()
@@ -47,7 +47,7 @@ Reads data from the specified fileName and returns an array of Hashmap
 			h = Hash.new("Post")
 			info = line.split(',')
 			h['title'] = info[0]
-			h['location'] = info[1]
+			h['location'] = info[1].strip
 			data << h
 		end
 		fd.close()
@@ -296,7 +296,8 @@ Converts raw data to use classes corresponding to their price range
 
 	def self.whichBracket(price)
 		bracket = 0
-		if(price.to_i <= 1000)
+		puts price
+		if(price.to_i <= 700)
 			bracket =1
 		else
 			bracket =2
