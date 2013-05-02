@@ -22,25 +22,25 @@ class Miner
 		#Crawl the web
 		@cls = StuffClassifier::Bayes.new("Craigs", :stemming=>true)
 		#The  lines below can be commented out once the pages have been crawled
-		spider = Crawler.new(20,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
-		begin
-			spider.deepCrawl()	
-		rescue Exception => e
-			#whatever
-			puts "Interupted during crawl"
-			Utility.writeDataSet(spider.gatheredData,spider.fileToWrite)
-		end
-		#go to sleep little program
-		puts "sleeping"
-		sleep(2)
-		puts "waking up and spamming craigslist"
-		spider = Crawler.new(20,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
-		begin
-			spider.deepCrawl()	
-		rescue Exception => e
-			puts "Interupted during crawl"
-			Utility.writeDataSet(spider.gatheredData,spider.fileToWrite)
-		end
+		# spider = Crawler.new(20,'burlington.craigslist.org','/roo/index','/roo/index.html',fileName)
+		# begin
+		# 	spider.deepCrawl()	
+		# rescue Exception => e
+		# 	#whatever
+		# 	puts "Interupted during crawl"
+		# 	Utility.writeDataSet(spider.gatheredData,spider.fileToWrite)
+		# end
+		# #go to sleep little program
+		# puts "sleeping"
+		# sleep(2)
+		# puts "waking up and spamming craigslist"
+		# spider = Crawler.new(20,'burlington.craigslist.org','/apa/index','/apa/index.html',fileName)
+		# begin
+		# 	spider.deepCrawl()	
+		# rescue Exception => e
+		# 	puts "Interupted during crawl"
+		# 	Utility.writeDataSet(spider.gatheredData,spider.fileToWrite)
+		# end
 		
 		@rawData = Utility.readDataSet(fileName)
 		puts @rawData.length
@@ -59,7 +59,7 @@ class Miner
 		included = 0
 		@rawData.each do |data|
 			#include every 3rd data piece in
-			if included % 5 == 1
+			if included % 3 == 0
 				@trainingData << data
 			else
 				@validationData << data
@@ -79,7 +79,7 @@ class Miner
 		wrong = 0
 		@validationData.each do |data| 
 			targetClass = data['location']
-			guess = @cls.classify(data['title'])
+			guess = @cls.classify(data['title'],2)
 			if guess != nil
 				guess =guess.to_s.upcase
 			end
